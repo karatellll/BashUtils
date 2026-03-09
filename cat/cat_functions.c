@@ -4,12 +4,21 @@
 
 extern int optind;
 
-void file_reader(char *file_name) {
+void file_reader(char *file_name, Flags *flags) {
     FILE * fp = fopen(file_name, "r");
+
+    int c;
+    int last = '\n';
+    int line_count = 1;
+    int is_empty = 0;
+
     if (fp != NULL) {
-        int c;
         while ((c = fgetc(fp)) != EOF) {
-            putc(c, stdout);
+            if (last == '\n') {
+                print_line_number(&line_count, is_empty, flags);
+            }
+            print_special_char(c, flags);
+            last = c;
         }
         fclose(fp);
 
@@ -55,6 +64,29 @@ int parse_flags(int argc, char *argv[], Flags *flags) {
     }
 
     return optind;
+}
 
+void print_line_number(int *line_count, int is_empty, Flags *flags) {
+    if (flags -> b) {
+        if (!is_empty) {
+            printf("%6d", (*line_count)++);
+            printf("\t");
+        } else if (flags -> n) {
+            printf("%6d", (*line_count)++);
+            printf("\t");
+        }
+    }
+}
+
+void print_special_char(int c, Flags *flags) {
+    if (c = '\n' && flags -> e) {
+        printf("$");
+    }
+    if (c = '\t' && flags -> t) {
+        printf("^I");
+    } else {
+        putc(c, stdout);
+    }
 
 }
+
